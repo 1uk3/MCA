@@ -19,7 +19,7 @@ float fir_coeff[] ={ -0.0000, -0.0021, -0.0063, -0.0116, -0.0124, 0.0000, 0.0318
 uint32_t *DAC_DEST= (uint32_t *) (DAC_BASE + 0x00000008 + DAC_Align_12b_R);
 
 
-void delay_ms(__IO uint32_t nTime);
+
 
 //can be modified over UART/USB
 volatile uint32_t thre=0;
@@ -32,21 +32,20 @@ uint16_t data[ADC_BUF_LEN];
 //spectrum
 uint32_t map[MAP_SIZE];
 
-void filter(uint32_t ptr);
 
+void filter(uint32_t ptr);
 void initADC(void);
 void initDAC(void);
 uint32_t measureOffset(void);
 void autoOffset(void);
+void delay_ms(__IO uint32_t nTime);
 
 int main(){
   while(SysTick_Config(48000)==1); //1ms
   
   initADC();
   
-  
   //UART_Init();
-  
   
   RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD | RCC_AHB1Periph_GPIOC , ENABLE);
   
@@ -128,7 +127,7 @@ int main(){
   return 0;
 }
 
-//ptr: index if the next write location (1 ahead of the last element)
+//ptr: index of the next write location (1 ahead of the last element)
 //y(k)=sum(a(i)*x(k-i))
 void filter(uint32_t ptr){
   
@@ -152,6 +151,7 @@ void filter(uint32_t ptr){
   }
 }
 
+//TODO limit max number of iterations
 void autoOffset(){
   //set 4096-200 < offset <=4096-100
   
