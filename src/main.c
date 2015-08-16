@@ -50,20 +50,20 @@ int main(){
 	
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD | RCC_AHB1Periph_GPIOC , ENABLE);
 	
-	GPIO_InitTypeDef      GPIO_InitStructure;
-	GPIO_InitStructure.GPIO_Pin = OrangeLED;
+  GPIO_InitTypeDef      GPIO_InitStructure;
+  GPIO_InitStructure.GPIO_Pin = OrangeLED;
   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_25MHz;
+  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_25MHz;
   GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL ;
   GPIO_Init(GPIOD, &GPIO_InitStructure);
   GPIO_InitStructure.GPIO_Pin = GreenLED;
   GPIO_Init(GPIOD, &GPIO_InitStructure);
   GPIO_InitStructure.GPIO_Pin = StepUpPin;
-	GPIO_Init(GPIOC, &GPIO_InitStructure);
+  GPIO_Init(GPIOC, &GPIO_InitStructure);
 
   ENGreenLED();
 
-	ENStepUp();
+  ENStepUp();
   delay_ms(1000); //charge the big caps
   DISGreenLED();
 
