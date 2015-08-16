@@ -36,6 +36,7 @@ uint32_t map[MAP_SIZE];
 void filter(uint32_t ptr);
 void initADC(void);
 void initDAC(void);
+void initIO(void);
 uint32_t measureOffset(void);
 void autoOffset(void);
 void delay_ms(__IO uint32_t nTime);
@@ -47,30 +48,16 @@ int main(){
   
   //UART_Init();
   
-  RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD | RCC_AHB1Periph_GPIOC , ENABLE);
-  
-  GPIO_InitTypeDef      GPIO_InitStructure;
-  GPIO_InitStructure.GPIO_Pin = OrangeLED;
-  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
-  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_25MHz;
-  GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL ;
-  GPIO_Init(GPIOD, &GPIO_InitStructure);
-  GPIO_InitStructure.GPIO_Pin = GreenLED;
-  GPIO_Init(GPIOD, &GPIO_InitStructure);
-  GPIO_InitStructure.GPIO_Pin = StepUpPin;
-  GPIO_Init(GPIOC, &GPIO_InitStructure);
+  initIO();
 
   ENGreenLED();
   ENStepUp();
   delay_ms(1000); //charge the big caps
   DISGreenLED();
 
-
   //initDAC();
   //autoOffset();
   thre = measureOffset()-TRIGGERLEVEL;
-  
-  
   
   //init map
   for(int i=0;i<MAP_SIZE;i++){
@@ -249,6 +236,22 @@ void initADC()
   ADC_Cmd(ADC1, ENABLE);
 
   ADC_SoftwareStartConv(ADC1);
+}
+
+void initIO(void){
+    
+  RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD | RCC_AHB1Periph_GPIOC , ENABLE);
+  
+  GPIO_InitTypeDef      GPIO_InitStructure;
+  GPIO_InitStructure.GPIO_Pin = OrangeLED;
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
+  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_25MHz;
+  GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL ;
+  GPIO_Init(GPIOD, &GPIO_InitStructure);
+  GPIO_InitStructure.GPIO_Pin = GreenLED;
+  GPIO_Init(GPIOD, &GPIO_InitStructure);
+  GPIO_InitStructure.GPIO_Pin = StepUpPin;
+  GPIO_Init(GPIOC, &GPIO_InitStructure);
 }
 
 volatile uint32_t TimingDelay=0;
