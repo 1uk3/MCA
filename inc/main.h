@@ -8,13 +8,13 @@ void incTicks(void);
 #define __MAINHEADERFILE
 
 //buffer has to be 2^x
-#define ADC_BUF_LEN 512		
+#define ADC_BUF_LEN 128		
 
 #if (ADC_BUF_LEN & ADC_BUF_LEN-1) || (ADC_BUF_LEN<=0)
 	#error Invalide ADC buffer size!
 #endif
 
-#define PRETRIGGER 100
+#define PRETRIGGER 25
 #define TRIGGERLEVEL 150
 
 
@@ -31,7 +31,7 @@ void incTicks(void);
 #define DISStepUp()	GPIOC->BSRRH =StepUpPin
 
 #define setDAC(val)			*DAC_DEST=val & 0xFFF;
-#define waitADC() while((ADC1->SR & ADC_FLAG_EOC) == RESET){}
+
 
 #define MAP_SIZE (2<<12)
 

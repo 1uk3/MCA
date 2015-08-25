@@ -23,12 +23,13 @@ uint32_t *DAC_DEST= (uint32_t *) (DAC_BASE + 0x00000008 + DAC_Align_12b_R);
 
 //can be modified over UART/USB
 volatile uint32_t thre=0;
+volatile uint8_t sendCurveEnable=0;
 
 //value for the auto offset adjustment
 uint32_t DACoffset=0;
 
 //ADC buffer
-uint16_t data[ADC_BUF_LEN];
+volatile uint16_t data[ADC_BUF_LEN];
 //spectrum
 uint32_t map[MAP_SIZE];
 
@@ -46,7 +47,7 @@ int main(){
   
   initADC();
   
-  //UART_Init();
+  UART_Init();
   
   initIO();
 
@@ -58,6 +59,7 @@ int main(){
   //initDAC();
   //autoOffset();
   thre = measureOffset()-TRIGGERLEVEL;
+  UARTsendOffset(thre);
   
   //init map
   for(int i=0;i<MAP_SIZE;i++){
@@ -69,9 +71,11 @@ int main(){
   uint32_t ptr=0;
   //main loop
   while(1){
-    ENOrangeLED();
     tmp = 99999;
     cnt = ADC_BUF_LEN - PRETRIGGER;
+    
+    uint32_t peak_ptr=0;
+    uint32_t best=5000;
     
     //wait for trigger
     while(tmp > thre){
@@ -81,33 +85,23 @@ int main(){
       ptr++;
       ptr=ptr & (ADC_BUF_LEN-1); //wrap
     }
-    
     //bigger but faster ^^
     //fill the rest of the buffer
     while(cnt>0){
       waitADC();
-      data[ptr]=ADC1->DR;
+      uint16_t tmp= ADC1->DR;
+      data[ptr]=tmp;
+      if(tmp<best){
+        best=tmp;
+        peak_ptr=ptr;
+      }
       ptr++;
       ptr=ptr & (ADC_BUF_LEN-1); //wrap
       cnt--;
     }
-    DISOrangeLED();
-    //UARTsendCurve(data,ADC_BUF_LEN,((ptr+1) & (ADC_BUF_LEN-1)));
-    
-    //filter
-    filter(ptr);
-    
-    //find peak
-    //TODO optimization: the peak can't be in the pretrigger area
-    uint32_t peak_ptr=0;
-    uint32_t best=5000;
-    for(int i =0; i<ADC_BUF_LEN;i++){
-      if(data[i]<best){
-        best = data[i];
-        peak_ptr=i;
-      }
-    }
-    
+
+    if(sendCurveEnable==1) UARTsendCurve(data,ADC_BUF_LEN,((ptr+1) & (ADC_BUF_LEN-1)));
+    if(sendCurveEnable==1) UARTsendPeak(data[peak_ptr]);
     map[data[peak_ptr]]++;
     
   }
