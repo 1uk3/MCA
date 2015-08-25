@@ -43,7 +43,7 @@ void autoOffset(void);
 void delay_ms(__IO uint32_t nTime);
 
 int main(){
-  while(SysTick_Config(48000)==1); //1ms
+  while(SysTick_Config(168000)==1); //1ms
   
   initADC();
   
@@ -192,8 +192,6 @@ void initADC()
 {
   ADC_InitTypeDef       ADC_InitStructure;
   GPIO_InitTypeDef      GPIO_InitStructure;
-
-  NVIC_InitTypeDef NVIC_InitStructure;
 
   /* Enable ADC3, DMA2 and GPIO clocks ****************************************/
   RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
