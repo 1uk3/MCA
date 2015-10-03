@@ -200,7 +200,7 @@ static void USART_Config(void)
   /* Enable the USART OverSampling by 8 */
   //USART_OverSampling8Cmd(USARTx, ENABLE); 
   
-  USART_InitStructure.USART_BaudRate = 115200;
+  USART_InitStructure.USART_BaudRate = 1000000;
   USART_InitStructure.USART_WordLength = USART_WordLength_8b;
   USART_InitStructure.USART_StopBits = USART_StopBits_1;
   /* When using Parity the word length must be configured to 9 bits */
