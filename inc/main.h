@@ -7,26 +7,18 @@ void incTicks(void);
 #ifndef __MAINHEADERFILE
 #define __MAINHEADERFILE
 
-//buffer has to be 2^x
-#define ADC_BUF_LEN 128		
+#define ADC_BUF_LEN 30		
 
-#if (ADC_BUF_LEN & ADC_BUF_LEN-1) || (ADC_BUF_LEN<=0)
-	#error Invalide ADC buffer size!
-#endif
+#define PRETRIGGER 5
 
-#define PRETRIGGER 25
-#define TRIGGERLEVEL 150
-
-
-
-#define GreenLED GPIO_Pin_12
-#define OrangeLED GPIO_Pin_13
+#define GreenLED GPIO_Pin_5
+#define OrangeLED GPIO_Pin_5
 #define StepUpPin GPIO_Pin_6
 
 #define ENOrangeLED()	GPIOD->BSRRL=OrangeLED
 #define DISOrangeLED()	GPIOD->BSRRH =OrangeLED
-#define ENGreenLED()	GPIOD->BSRRL=GreenLED
-#define DISGreenLED()	GPIOD->BSRRH =GreenLED
+#define ENGreenLED()	GPIOA->BSRRL=GreenLED
+#define DISGreenLED()	GPIOA->BSRRH =GreenLED
 #define ENStepUp()	GPIOC->BSRRL=StepUpPin
 #define DISStepUp()	GPIOC->BSRRH =StepUpPin
 

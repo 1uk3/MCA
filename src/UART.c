@@ -8,6 +8,10 @@ uint8_t TxBuffer[TX_BUFFER_SIZE];
 
 
 extern volatile uint32_t trigger_lvl;
+extern volatile uint32_t thre;
+extern uint32_t map[MAP_SIZE];
+
+uint8_t TX_DMA_READY=1;
 
 struct command{
 	uint8_t cmd;
@@ -24,23 +28,15 @@ void sendCMD(uint8_t cmd);
 void UART_Init(void)
 {
     c.rcnt=0;
-		USART_Config();
-		
-		//DMA_DeInit(DMA1_Stream1);
-		//DMA_DeInit(USARTx_RX_DMA_CHANNEL);
-		USART_DeInit(USARTx);
 
 		USART_Config();
-		
-		//DMA_Cmd(USARTx_RX_DMA_CHANNEL,ENABLE);
-		//USART_DMACmd(USARTx, USART_DMAReq_Rx, ENABLE);
 }
 
 void parse()
 {
 	switch(c.cmd){
 			case OFFSET:{
-        UARTsendOffset(measureOffset());
+        UARTsendOffset(thre);
 				break;
 			}
 			case FLASH_LED:{
@@ -52,11 +48,11 @@ void parse()
 				break;
 			}
       case SENDCURVEEN:{
-        sendCurveEnable =1;
+        //sendCurveEnable =1;
         break;
       }
       case SENDCURVEDIS:{
-        sendCurveEnable =0;
+        //sendCurveEnable =0;
         break;
       }
       case TRIGGER_LVL:{
@@ -64,7 +60,7 @@ void parse()
         break;
       }
       case GET_MAP:{
-        UARTsendCurve(data, ADC_BUF_LEN, 0);
+        //UARTsendCurve(data, ADC_BUF_LEN, 0);
         break;
       }
 			case EMPTY:{
@@ -104,7 +100,7 @@ void UARTsendPeak(uint16_t val){
   UARTsendSingle16(NEW_PEAK,val);
 }
 
-void UARTsendCurve(uint16_t buffer[], uint16_t len, uint16_t trigger_pos){
+void UARTsendCurve(uint16_t *buffer, uint16_t len, uint16_t trigger_pos){
   UARTsendCMD('\n',1);
   UARTsendCMD(1,1);
   
@@ -176,8 +172,8 @@ static void USART_Config(void)
 
   /* Peripheral Clock Enable -------------------------------------------------*/
   /* Enable GPIO clock */
-  RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB, ENABLE);
-  RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART3,ENABLE);
+  RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
+  RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2,ENABLE);
   /* Enable USART clock */
 //USART_ClockInit(USARTx,);
   /* Enable the DMA clock */
@@ -204,12 +200,11 @@ static void USART_Config(void)
   /* Enable the USART OverSampling by 8 */
   //USART_OverSampling8Cmd(USARTx, ENABLE); 
   
-  
-  USART_InitStructure.USART_BaudRate = 1000000;
-  USART_InitStructure.USART_WordLength = USART_WordLength_9b;
+  USART_InitStructure.USART_BaudRate = 115200;
+  USART_InitStructure.USART_WordLength = USART_WordLength_8b;
   USART_InitStructure.USART_StopBits = USART_StopBits_1;
   /* When using Parity the word length must be configured to 9 bits */
-  USART_InitStructure.USART_Parity = USART_Parity_Even;
+  USART_InitStructure.USART_Parity = USART_Parity_No;
   USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
   USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
   USART_Init(USARTx, &USART_InitStructure);
@@ -218,31 +213,7 @@ static void USART_Config(void)
    
   /* Configure DMA Initialization Structure */
   
-  /*DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_Byte;
-  DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
-  DMA_InitStructure.DMA_Mode = DMA_Mode_Normal;
-  
-  DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Byte;
-  DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
-  DMA_InitStructure.DMA_Priority = DMA_Priority_High;
-  // Configure TX DMA 
-	DMA_InitStructure.DMA_PeripheralBaseAddr =(uint32_t) (&(USARTx->DR)) ;
-  DMA_InitStructure.DMA_DIR = DMA_DIR_MemoryToPeripheral ;
-  DMA_InitStructure.DMA_Memory0BaseAddr =(uint32_t)TxBuffer;//(uint32_t)Buffer ;
-	DMA_InitStructure.DMA_BufferSize = TX_BUFFER_SIZE;
-  DMA_Init(DMA1_Stream1,&DMA_InitStructure);
-	
-	DMA_ITConfig(DMA1_Stream1, DMA_IT_TC, ENABLE);
-	
-	  // Enable the DMA Stream IRQ Channel 
-  NVIC_InitStructure.NVIC_IRQChannel = DMA1_Stream1_IRQn;
-  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
-  NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-  NVIC_Init(&NVIC_InitStructure);   		   
-	
-  USART_ITConfig(USARTx,USART_IT_RXNE,ENABLE);*/
-  
-		  // Enable the IRQ 
+	// Enable the IRQ 
   NVIC_InitStructure.NVIC_IRQChannel = USARTx_IRQn;
   NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
   NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
@@ -250,5 +221,65 @@ static void USART_Config(void)
 				 
   // Enable USART */
   USART_Cmd(USARTx, ENABLE);
+}
+
+void sendMap(uint32_t *buffer){
+	if(TX_DMA_READY!=1)return;
+		
+	UARTsendCMD('\n',0);
+  UARTsendCMD(9,0); 
+  UARTsend2Byte(1<<14);//2 arg bytes
+	
+	while(!USART_GetFlagStatus(USARTx,USART_FLAG_TC)){}
+	
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_DMA1, ENABLE);
+	
+	DMA_InitTypeDef  DMA_InitStructure;
+ 
+  DMA_DeInit(DMA1_Stream6);
+ 
+  DMA_InitStructure.DMA_Channel = DMA_Channel_4;
+  DMA_InitStructure.DMA_DIR = DMA_DIR_MemoryToPeripheral; // Transmit
+  DMA_InitStructure.DMA_Memory0BaseAddr = (uint32_t)buffer;
+  DMA_InitStructure.DMA_BufferSize = (uint16_t)1<<14;
+  DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)&USART2->DR;
+  DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
+  DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
+  DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Byte;
+  DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_Byte;
+  DMA_InitStructure.DMA_Mode = DMA_Mode_Normal;
+  DMA_InitStructure.DMA_Priority = DMA_Priority_High;
+  DMA_InitStructure.DMA_FIFOMode = DMA_FIFOMode_Disable;
+  DMA_InitStructure.DMA_FIFOThreshold = DMA_FIFOThreshold_Full;
+  DMA_InitStructure.DMA_MemoryBurst = DMA_MemoryBurst_Single;
+  DMA_InitStructure.DMA_PeripheralBurst = DMA_PeripheralBurst_Single;
+ 
+  DMA_Init(DMA1_Stream6, &DMA_InitStructure);
+ 
+  /* Enable the USART Tx DMA request */
+  USART_DMACmd(USART2, USART_DMAReq_Tx, ENABLE);
+ 
+  /* Enable DMA Stream Transfer Complete interrupt */
+		NVIC_InitTypeDef NVIC_InitStructure;
+
+	NVIC_InitStructure.NVIC_IRQChannel = DMA1_Stream6_IRQn;
+  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 3;
+  NVIC_InitStructure.NVIC_IRQChannelSubPriority = 3;
+  NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+  NVIC_Init(&NVIC_InitStructure);
+  DMA_ITConfig(DMA1_Stream6, DMA_IT_TC, ENABLE);
+ 
+  /* Enable the DMA Tx Stream */
+  DMA_Cmd(DMA1_Stream6, ENABLE);
+	
+	TX_DMA_READY=0;
+	
+	//while(DMA_GetITStatus(DMA1_Stream6,DMA_IT_TCIF6)!=SET){}
+	//DMA_ClearITPendingBit(DMA1_Stream6, DMA_IT_TCIF6);
+}
+
+void DMA1_Stream6_IRQHandler(){
+	DMA_ClearITPendingBit(DMA1_Stream6,DMA_IT_TCIF6);
+	TX_DMA_READY=1;
 }
 

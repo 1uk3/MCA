@@ -11,8 +11,9 @@ int UARTsendCMD(uint8_t cmd, uint8_t wait);
 void UARTsendOffset(uint16_t val);
 void UARTsendPeak(uint16_t val);
 inline void UARTsend2Byte(uint16_t val);
+void sendMap(uint32_t *buffer);
 
-void UARTsendCurve(uint16_t buffer[], uint16_t len, uint16_t trigger_pos);
+void UARTsendCurve(uint16_t *buffer, uint16_t len, uint16_t trigger_pos);
 
 extern volatile uint32_t thre;
 extern volatile uint8_t sendCurveEnable;
@@ -28,25 +29,25 @@ typedef enum {EMPTY=0,GET_DATA=1,OFFSET=2,FLASH_LED=3,GET_PPM=4,TRIGGER_LVL=5, N
  #define UART_WRE	GPIO_Pin_8
  #define UART_RDE	GPIO_Pin_11
 
- #define USARTx                           USART3
-  #define USARTx_CLK                       RCC_APB2Periph_USART3
+ #define USARTx                           USART2
+  #define USARTx_CLK                       RCC_APB2Periph_USART2
   #define USARTx_CLK_INIT                  RCC_APB2PeriphClockCmd
 	//RCC_APB2PeriphClockCmd
-  #define USARTx_IRQn                      USART3_IRQn
-  #define USARTx_IRQHandler                USART3_IRQHandler
+  #define USARTx_IRQn                      USART2_IRQn
+  #define USARTx_IRQHandler                USART2_IRQHandler
 	#define USARTx_FLAG_RXNE									USART_FLAG_RXNE
 
-  #define USARTx_TX_PIN                    GPIO_Pin_10               
-  #define USARTx_TX_GPIO_PORT              GPIOB                       
-  #define USARTx_TX_GPIO_CLK               RCC_AHB1Periph_GPIOB
-  #define USARTx_TX_SOURCE                 GPIO_PinSource10
-  #define USARTx_TX_AF                     GPIO_AF_USART3
+  #define USARTx_TX_PIN                    GPIO_Pin_2              
+  #define USARTx_TX_GPIO_PORT              GPIOA                      
+  #define USARTx_TX_GPIO_CLK               RCC_AHB1Periph_GPIOA
+  #define USARTx_TX_SOURCE                 GPIO_PinSource2
+  #define USARTx_TX_AF                     GPIO_AF_USART2
 
-  #define USARTx_RX_PIN                    GPIO_Pin_11             
-  #define USARTx_RX_GPIO_PORT              GPIOB                   
-  #define USARTx_RX_GPIO_CLK               RCC_AHB1Periph_GPIOB
-  #define USARTx_RX_SOURCE                 GPIO_PinSource11
-  #define USARTx_RX_AF                     GPIO_AF_USART3
+  #define USARTx_RX_PIN                    GPIO_Pin_3             
+  #define USARTx_RX_GPIO_PORT              GPIOA                   
+  #define USARTx_RX_GPIO_CLK               RCC_AHB1Periph_GPIOA
+  #define USARTx_RX_SOURCE                 GPIO_PinSource3
+  #define USARTx_RX_AF                     GPIO_AF_USART2
 
   /* Definition for DMAx resources **********************************************/
   #define USARTx_DR_ADDRESS                ((uint32_t)USART1 + 0x04) 
